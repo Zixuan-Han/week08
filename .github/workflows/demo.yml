@@ -22,7 +22,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd week08/backend/product_service
+          cd backend/product_service
           docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
       - name: Scan image with Trivy (docker image; fail on HIGH/CRITICAL)

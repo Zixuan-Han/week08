@@ -1,0 +1,43 @@
+name: Demo Build-and-Scan
+
+on:
+  push:
+    branches:
+      - demo
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: product-service
+  IMAGE_TAG: ci-${{ github.run_id }}
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          cd week08/backend/product_service
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+
+      - name: Scan image with Trivy (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@v0.6.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          vuln-type: 'os,library'
+          output: 'trivy-report.txt'
+
+      - name: Upload Trivy report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.txt

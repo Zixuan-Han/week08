@@ -32,6 +32,8 @@ jobs:
         run: |
           # build with explicit context path (no cd)
           docker build -t $IMAGE_NAME:$IMAGE_TAG backend/product_service
+          # 如果真实路径是 week08/backend/product_service，请把上一行改成：
+          # docker build -t $IMAGE_NAME:$IMAGE_TAG week08/backend/product_service
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -45,7 +47,6 @@ jobs:
 
       - name: Scan image with Trivy (docker image; fail on HIGH/CRITICAL)
         run: |
-          # run trivy container and scan the locally built image
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
             aquasecurity/trivy:latest image \
             --exit-code 1 \

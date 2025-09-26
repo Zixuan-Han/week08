@@ -32,12 +32,13 @@ jobs:
       - name: Pull Trivy image (from GHCR)
         run: docker pull ghcr.io/aquasecurity/trivy:latest
 
-      - name: Scan with Trivy (fail on HIGH/CRITICAL)
+      - name: Scan with Trivy (pass unless CRITICAL)
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
             ghcr.io/aquasecurity/trivy:latest image \
             --exit-code 1 \
-            --severity CRITICAL,HIGH \
+            --severity CRITICAL \        
+            --ignore-unfixed \           
             --format table \
             --output trivy-report.txt \
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}

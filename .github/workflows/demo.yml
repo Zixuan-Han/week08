@@ -14,7 +14,7 @@ jobs:
   build-and-scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -25,19 +25,28 @@ jobs:
           cd week08/backend/product_service
           docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
-      - name: Scan image with Trivy (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@v0.33.0
-        with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
-          vuln-type: 'os,library'
-          output: 'trivy-report.txt'
+      - name: Scan image with Trivy (docker image; fail on HIGH/CRITICAL)
+        # Use Trivy docker image to scan the local image; mount docker socket
+        run: |
+          # pull trivy image (optional — docker run will auto-pull)
+          docker pull aquasecurity/trivy:latest
+
+          # Run trivy to scan the local image; produce a table report and JSON copy
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasecurity/trivy:latest image \
+            --exit-code 1 \
+            --severity CRITICAL,HIGH \
+            --format table \
+            --output trivy-report.txt \
+            --format json \
+            --output trivy-report.json \
+            ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: Upload Trivy report (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report
-          path: trivy-report.txt
+          path: |
+            trivy-report.txt
+            trivy-report.json

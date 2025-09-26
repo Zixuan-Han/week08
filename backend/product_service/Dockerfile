@@ -1,6 +1,6 @@
 # week08/backend/product_service/Dockerfile
 
-FROM python:3.13-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

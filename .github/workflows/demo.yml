@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Debug: show repo top-level
+      - name: "Debug: show repo top-level"
         run: |
           pwd
           ls -la
